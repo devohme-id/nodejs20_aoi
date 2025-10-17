@@ -1,0 +1,438 @@
+/* ==========================================================================
+   Load Font Kustom
+   ========================================================================== */
+@font-face {
+    font-family: 'MyFontText';
+    src: url('../assets/fonts/LGEITextTTF-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'MyFontHeadline';
+    src: url('../assets/fonts/LGEIHeadlineTTF-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* ==========================================================================
+   Base Styles & Theming
+   ========================================================================== */
+:root {
+    --bg-color: #0f172a;
+    --card-color: #1e293b;
+    --border-color: #334155;
+    --text-color: #e2e8f0;
+    --text-light: #94a3b8;
+    --accent-color: #22d3ee;
+    --green-color: #4ade80;
+    --red-color: #f87171;
+    --yellow-color: #facc15;
+    --blue-color: #60a5fa;
+    --gray-color: #475569;
+    --text-dark: #0f172a;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'MyFontText', sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.font-orbitron,
+.header-title,
+.header-clock {
+    font-family: 'MyFontHeadline', sans-serif;
+}
+
+/* ==========================================================================
+   Layout Utama
+   ========================================================================== */
+.header-ui {
+    flex-shrink: 0;
+    background-color: rgba(30, 41, 59, 0.8);
+    backdrop-filter: blur(5px);
+    padding: 1rem 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid var(--border-color);
+}
+
+.header-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.header-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-light);
+}
+
+.header-clock {
+    text-align: right;
+}
+
+.header-clock p:first-child {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--accent-color);
+}
+
+.header-clock p:last-child {
+    font-size: 0.875rem;
+    color: var(--text-light);
+}
+
+.header-clock-area {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.btn-report {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    font-family: 'MyFontHeadline', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-dark);
+    background: linear-gradient(90deg, var(--accent-color), var(--blue-color));
+    border: none;
+    border-radius: 0.6rem;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-report:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+}
+
+.btn-report:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* PENAMBAHAN: Style untuk navigasi aktif */
+.btn-report.active-nav {
+    transform: translateY(2px);
+    box-shadow: inset 0 -4px 0 0 rgba(255, 255, 255, 0.8);
+    cursor: default;
+}
+
+/* Penambahan Style untuk Tombol Suara */
+.sound-btn {
+    background: var(--gray-color);
+    color: var(--text-color);
+    padding: 0.5rem;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+}
+
+.sound-btn.muted .unmuted-icon {
+    display: none;
+}
+
+.sound-btn:not(.muted) .muted-icon {
+    display: none;
+}
+
+.sound-btn:not(.muted) {
+    background: linear-gradient(90deg, var(--accent-color), var(--blue-color));
+    color: var(--text-dark);
+}
+
+
+.panel-area {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 1rem;
+    height: 100%;
+    padding: 1rem;
+    overflow: hidden;
+}
+
+.card-ui {
+    background-color: var(--card-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    display: grid;
+    grid-template-rows: min-content 2fr min-content 1fr;
+    gap: 0.5rem;
+    min-height: 0;
+    overflow: hidden;
+    /* Perubahan: Transisi dan hover dipindahkan dari sini */
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.panel-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    font-family: 'MyFontHeadline', sans-serif;
+}
+
+.panel-status {
+    padding: 0.3rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-dark) !important;
+}
+
+.panel-content {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: 1.5rem;
+    align-items: center;
+    min-height: 0;
+}
+
+.panel-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+}
+
+.kpi-item {
+    background-color: rgba(15, 23, 42, 0.5);
+    border-radius: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    text-align: center;
+}
+
+.kpi-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    transition: color 0.3s ease;
+}
+
+.kpi-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: var(--text-light);
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    min-height: 0;
+}
+
+.panel-details {
+    flex-basis: 55%;
+    font-size: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 0;
+}
+
+.detail-item {
+    display: grid;
+    grid-template-columns: 85px 1fr;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+}
+
+.detail-label {
+    color: var(--text-light);
+}
+
+.detail-value {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.image-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: #00000030;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 3px solid transparent;
+    transition: all 0.3s ease;
+    /* PENAMBAHAN: Kursor untuk menandakan bisa diklik */
+    cursor: pointer;
+}
+
+/* PENAMBAHAN: Efek hover hanya pada gambar */
+.image-container:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    /* Bayangan putih halus saat hover */
+}
+
+
+.defect-image,
+.pcb-visual-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'MyFontHeadline', sans-serif;
+}
+
+.defect-image {
+    object-fit: contain;
+}
+
+.pcb-visual-placeholder {
+    font-size: 1.25rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.kpi-good {
+    color: var(--green-color) !important;
+}
+
+.kpi-bad {
+    color: var(--red-color) !important;
+}
+
+.kpi-pass-color {
+    color: var(--green-color);
+}
+
+.kpi-false_call-color {
+    color: var(--yellow-color);
+}
+
+.panel-status.status-pass {
+    background-color: var(--green-color);
+}
+
+.panel-status.status-defective {
+    background-color: var(--red-color);
+}
+
+.panel-status.status-false_fail {
+    background-color: var(--yellow-color);
+}
+
+.panel-status.status-unreviewed {
+    background-color: var(--blue-color);
+}
+
+.panel-status.status-inactive {
+    background-color: var(--gray-color);
+    color: var(--text-color) !important;
+}
+
+.pcb-visual-pass {
+    background: linear-gradient(45deg, #052e16, #15803d);
+    color: white;
+}
+
+.pcb-visual-defective {
+    background: linear-gradient(45deg, #450a0a, #b91c1c);
+    color: white;
+}
+
+.pcb-visual-false_fail {
+    background: linear-gradient(45deg, #78350f, #f59e0b);
+    color: white;
+}
+
+.pcb-visual-unreviewed {
+    background: linear-gradient(45deg, #1e40af, #3b82f6);
+    color: white;
+}
+
+.pcb-visual-inactive {
+    background: #1e293b;
+    border: 2px dashed var(--border-color);
+    color: var(--text-light);
+}
+
+.image-container.status-pass {
+    border-color: var(--green-color);
+    box-shadow: 0 0 15px var(--green-color);
+}
+
+.image-container.status-defective {
+    border-color: var(--red-color);
+    box-shadow: 0 0 15px var(--red-color);
+}
+
+.image-container.status-false_fail {
+    border-color: var(--yellow-color);
+    box-shadow: 0 0 15px var(--yellow-color);
+}
+
+.image-container.status-unreviewed {
+    border-color: var(--blue-color);
+    box-shadow: 0 0 15px var(--blue-color);
+}
+
+.image-container.status-inactive {
+    border-color: var(--border-color);
+}
+
+/* Peringatan Critical Defect, hanya menargetkan border gambar */
+.image-container.critical-alert {
+    border-color: var(--red-color);
+    box-shadow: 0 0 25px var(--red-color);
+    animation: pulse-red-border 1.5s infinite;
+}
+
+@keyframes pulse-red-border {
+    50% {
+        box-shadow: 0 0 35px var(--red-color);
+    }
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    min-height: 0;
+    /* PERUBAHAN: Gunakan flexbox untuk layout yang lebih aman */
+    display: flex;
+    gap: 1.5rem;
+    padding-top: 0.5rem;
+}
+
+.chart-wrapper {
+    position: relative;
+    flex: 1;
+    /* Setiap chart akan mengambil ruang yang sama */
+    min-width: 0;
+}
