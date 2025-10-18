@@ -6,12 +6,12 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
+import rateLimit from "express-rate-limit";
 
 // Import API routes
 import dashboardRouter from "./api/get_dashboard_data.js";
 import imageRouter from "./api/get_image.js";
 
-// Setup base path references
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,20 +23,40 @@ dotenv.config();
 app.use(cors());
 app.use(express.json());
 
-// Serve static frontend (HTML, CSS, JS, assets)
-app.use(express.static(path.join(__dirname, "public")));
+// ======================================================
+// Rate Limiter (before API)
+// ======================================================
+const apiLimiter = rateLimit({
+  windowMs: 5000, // 5 detik
+  max: 300,       // max 200 request/5 detik/IP
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // ======================================================
 // API Routes
 // ======================================================
-app.use("/api/dashboard", dashboardRouter); // Data API
-app.use("/api", imageRouter);               // Image API (/api/image & /api/get_image.php)
+app.use("/api/dashboard", apiLimiter, dashboardRouter);
+app.use("/api/image", imageRouter);
 
 // ======================================================
-// Default Route (serve index.html for SPA/frontpage)
+// Serve Static Frontend
+// ======================================================
+app.use(express.static(path.join(__dirname, "public")));
+
+// ======================================================
+// Default Route
 // ======================================================
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// ======================================================
+// Global Error Handler
+// ======================================================
+app.use((err, req, res, next) => {
+  console.error("💥 Uncaught error:", err);
+  res.status(500).json({ error: "Internal Server Error" });
 });
 
 // ======================================================
@@ -51,4 +71,12 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log("📊 API (Dashboard): /api/dashboard");
   console.log("🖼️  API (Images):   /api/image?line=5&date=20251017&file=xxx.jpg");
   console.log("==========================================");
+});
+
+// ======================================================
+// Graceful Shutdown
+// ======================================================
+process.on("SIGTERM", () => {
+  console.log("🛑 Server shutting down gracefully...");
+  process.exit(0);
 });
