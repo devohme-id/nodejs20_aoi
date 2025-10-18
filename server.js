@@ -5,6 +5,7 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
+import dotenv from "dotenv";
 
 // Import API routes
 import dashboardRouter from "./api/get_dashboard_data.js";
@@ -14,6 +15,7 @@ import imageRouter from "./api/get_image.js";
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+dotenv.config();
 
 // ======================================================
 // Middleware
@@ -41,7 +43,7 @@ app.get("/", (req, res) => {
 // Start Server
 // ======================================================
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log("==========================================");
   console.log("✅ Smart AOI Dashboard Server is running!");
   console.log(`🌐 http://localhost:${PORT}`);
