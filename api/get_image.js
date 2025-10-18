@@ -1,26 +1,13 @@
+// File: api/get_image.js
 import express from "express";
 import fs from "fs";
-import os from "os";
 import path from "path";
+import os from "os";
 
 const router = express.Router();
 
-// ======================================================
-//  get_image.js - Cross Platform SMB / Local Access
-// ======================================================
-
-// Mapping path Windows
-const windowsPaths = {
-  1: "\\\\192.168.0.19\\qx600\\QX600\\Images\\ExportedImages",
-  2: "\\\\192.168.0.21\\qx600\\Images\\ExportedImages\\ExportedImages",
-  3: "\\\\192.168.0.29\\qx600\\Images\\ExportedImages",
-  4: "\\\\192.168.0.25\\qx600\\Images\\ExportedImages",
-  5: "\\\\192.168.0.35\\D_Drive\\QX600\\Images\\ExportedImages",
-  6: "\\\\192.168.0.23\\D_Drive\\QX600\\Images\\ExportedImages",
-};
-
-// Mapping path Linux
-const linuxPaths = {
+// Path mapping Linux & macOS
+const LINUX_PATHS = {
   1: "/mnt/qx600_1",
   2: "/mnt/qx600_2",
   3: "/mnt/qx600_3",
@@ -29,64 +16,75 @@ const linuxPaths = {
   6: "/mnt/qx600_6",
 };
 
-// Deteksi OS sekali saja
-const isWindows = os.platform().startsWith("win");
-
-// Pilih mapping sesuai OS
-const PATH_MAP = isWindows ? windowsPaths : linuxPaths;
-
-// MIME helper
-const mimeTypes = {
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".png": "image/png",
-  ".bmp": "image/bmp",
-  ".gif": "image/gif",
+// Path mapping Windows (jika nanti server pindah OS)
+const WINDOWS_PATHS = {
+  1: "\\\\192.168.0.19\\qx600\\QX600\\Images\\ExportedImages",
+  2: "\\\\192.168.0.21\\qx600\\Images\\ExportedImages\\ExportedImages",
+  3: "\\\\192.168.0.29\\qx600\\Images\\ExportedImages",
+  4: "\\\\192.168.0.25\\qx600\\Images\\ExportedImages",
+  5: "\\\\192.168.0.35\\D_Drive\\QX600\\Images\\ExportedImages",
+  6: "\\\\192.168.0.23\\D_Drive\\QX600\\Images\\ExportedImages",
 };
 
-// ======================================================
-//  Route utama: /api/image?line=5&date=20251017&file=xxx.jpg
-// ======================================================
-router.get(["/image", "/get_image.php"], async (req, res) => {
-  try {
-    const line = parseInt(req.query.line || 0);
-    const date = (req.query.date || "").replace(/[^0-9]/g, "");
-    const file = path.basename(req.query.file || "");
+// Deteksi OS
+const isWindows = os.platform().startsWith("win");
 
-    if (!line || !file) {
-      return res.status(400).send("Invalid parameters: line and file are required.");
-    }
+// Cache untuk path check agar gak sering I/O
+const cache = new Map();
+const CACHE_TTL = 5000; // ms
 
-    const basePath = PATH_MAP[line];
-    if (!basePath) {
-      return res.status(404).send(`Invalid line ID: ${line}`);
-    }
+function getCachedStat(filePath) {
+  const now = Date.now();
+  const entry = cache.get(filePath);
+  if (entry && now - entry.time < CACHE_TTL) return entry.exists;
+  const exists = fs.existsSync(filePath);
+  cache.set(filePath, { exists, time: now });
+  return exists;
+}
 
-    // Rangkai path gambar
-    let imagePath = path.join(basePath);
-    const datePath = path.join(imagePath, date);
-    if (date && fs.existsSync(datePath)) {
-      imagePath = datePath;
-    }
-    imagePath = path.join(imagePath, file);
+router.get("/", (req, res) => {
+  const line = parseInt(req.query.line, 10);
+  const date = (req.query.date || "").replace(/[^0-9]/g, "");
+  const file = path.basename(req.query.file || "");
 
-    // Cek file
-    if (!fs.existsSync(imagePath)) {
-      console.warn(`❌ Image not found: ${imagePath}`);
-      return res.status(404).send("Image not found");
-    }
-
-    // Tentukan MIME
-    const ext = path.extname(file).toLowerCase();
-    const mime = mimeTypes[ext] || "application/octet-stream";
-    res.setHeader("Content-Type", mime);
-
-    // Stream file langsung ke response
-    fs.createReadStream(imagePath).pipe(res);
-  } catch (err) {
-    console.error("⚠️ Error serving image:", err);
-    res.status(500).send("Internal Server Error");
+  if (!line || !file) {
+    return res.status(400).send("Invalid parameters.");
   }
+
+  const basePath = isWindows ? WINDOWS_PATHS[line] : LINUX_PATHS[line];
+  if (!basePath) {
+    return res.status(404).send("Invalid line ID.");
+  }
+
+  let imagePath = path.join(basePath, date || "", file);
+
+  if (!getCachedStat(imagePath)) {
+    // Kadang folder tanggal belum sinkron → coba tanpa date
+    const fallbackPath = path.join(basePath, file);
+    if (!getCachedStat(fallbackPath)) {
+      res.status(404).type("text/plain").send("Image not found");
+      return;
+    }
+    imagePath = fallbackPath;
+  }
+
+  const stream = fs.createReadStream(imagePath);
+  const ext = path.extname(file).toLowerCase();
+  const mime =
+    ext === ".jpg" || ext === ".jpeg"
+      ? "image/jpeg"
+      : ext === ".png"
+      ? "image/png"
+      : "application/octet-stream";
+
+  res.setHeader("Content-Type", mime);
+  res.setHeader("Cache-Control", "no-store");
+  stream.pipe(res);
+
+  stream.on("error", (err) => {
+    console.error("Error reading image:", err);
+    res.status(500).type("text/plain").send("Error reading image");
+  });
 });
 
 export default router;
