@@ -6,17 +6,20 @@ const router = express.Router();
 const debugMode = false;
 
 // ======================================================
-// Konfigurasi database — sesuaikan dengan server kamu
+// Konfigurasi Database — gunakan Pool untuk efisiensi
 // ======================================================
-const dbConfig = {
+const pool = mysql.createPool({
   host: "192.168.12.204",
   user: "db_admin",
   password: "ohm@2025",
   database: "aoi_dashboard",
-};
+  waitForConnections: true,
+  connectionLimit: 10, // batas maksimal koneksi aktif
+  queueLimit: 0,       // antrean tak terbatas
+});
 
 // ======================================================
-// Konstanta dan Helper Functions
+// Konstanta & Helper Functions
 // ======================================================
 const CRITICAL_DEFECTS = [
   "SHORT SOLDER",
@@ -77,16 +80,15 @@ function calculateKpiMetrics(result) {
 }
 
 // ======================================================
-// Fungsi utama ambil data dashboard
+// Fungsi Utama: Ambil Data Dashboard
 // ======================================================
 async function getDashboardData(conn) {
   const response = { lines: {} };
 
-  // Ambil panel terakhir dari tiap line
   const [panelRows] = await conn.query(`
     WITH LatestPanel AS (
       SELECT i.*, d.ComponentRef, d.PartNumber, d.ReworkDefectCode, d.MachineDefectCode, d.ImageFileName,
-             ROW_NUMBER() OVER(PARTITION BY i.LineID ORDER BY i.EndTime DESC) as rn
+             ROW_NUMBER() OVER(PARTITION BY i.LineID ORDER BY i.EndTime DESC) AS rn
       FROM Inspections i
       LEFT JOIN Defects d ON i.InspectionID = d.InspectionID
     )
@@ -98,7 +100,6 @@ async function getDashboardData(conn) {
     latestPanels[row.LineID] = row;
   }
 
-  // Loop tiap line
   for (let i = 1; i <= 6; i++) {
     const panelData = latestPanels[i];
     const lineData = {
@@ -112,7 +113,6 @@ async function getDashboardData(conn) {
 
     if (panelData) {
       lineData.status = panelData.FinalResult || "INACTIVE";
-
       lineData.details = {
         time: panelData.EndTime
           ? new Date(panelData.EndTime).toLocaleTimeString("id-ID", { hour12: false })
@@ -128,9 +128,7 @@ async function getDashboardData(conn) {
         (panelData.MachineDefectCode || "").toUpperCase()
       );
 
-      // ======================================================
-      // 🔧 Revisi URL gambar: gunakan /api/image (tanpa .php)
-      // ======================================================
+      // URL gambar pakai route Node.js
       if (panelData.ImageFileName) {
         const parts = panelData.ImageFileName.split("\\");
         if (parts.length >= 2) {
@@ -142,9 +140,7 @@ async function getDashboardData(conn) {
         }
       }
 
-      // ======================================================
-      // KPI saat ini (current tuning cycle)
-      // ======================================================
+      // KPI sekarang
       const currentAssembly = panelData.Assembly;
       const currentLot = panelData.LotCode;
       const currentCycle = Number(panelData.TuningCycleID);
@@ -166,9 +162,7 @@ async function getDashboardData(conn) {
         lineData.kpi = calculateKpiMetrics(kpiRows[0]);
       }
 
-      // ======================================================
-      // Perbandingan dengan cycle sebelumnya
-      // ======================================================
+      // KPI sebelumnya (perbandingan)
       lineData.comparison_data.current = lineData.kpi;
       if (currentCycle > 1) {
         const prevCycle = currentCycle - 1;
@@ -198,19 +192,21 @@ async function getDashboardData(conn) {
 }
 
 // ======================================================
-// Route Handler
+// Route Handler — gunakan Pool
 // ======================================================
 router.get("/", async (req, res) => {
   let conn;
   try {
-    conn = await mysql.createConnection(dbConfig);
+    conn = await pool.getConnection();
+    conn.config.namedPlaceholders = true;
+
     const data = await getDashboardData(conn);
     res.json(data);
   } catch (err) {
-    console.error("API Error:", err);
+    console.error("❌ API Error:", err.message);
     res.status(500).json({ error: `API Error: ${err.message}` });
   } finally {
-    if (conn) await conn.end();
+    if (conn) conn.release();
   }
 });
 
