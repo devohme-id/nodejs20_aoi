@@ -28,7 +28,7 @@ app.use(express.json());
 // ======================================================
 const apiLimiter = rateLimit({
   windowMs: 5000, // 5 detik
-  max: 300,       // max 200 request/5 detik/IP
+  max: 300,       // max 300 request/5 detik/IP
   standardHeaders: true,
   legacyHeaders: false,
 });
