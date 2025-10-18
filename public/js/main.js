@@ -3,7 +3,7 @@
 // ==========================================================================
 // const API_URL = 'api/get_dashboard_data.php';
 const API_URL = '/api/dashboard';
-const REFRESH_INTERVAL = 5000;
+// const REFRESH_INTERVAL = 5000; // <-- DIHAPUS (Tidak dipakai lagi)
 const TARGET_PASS_RATE = 90;
 const TARGET_PPM = 2100;
 const SOUND_DELAY = 2000;
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
             manageAlertSound(isCriticalActive);
         });
     }
-    
+
     // Buat struktur HTML awal
     let content = '';
     for (let i = 1; i <= 6; i++) {
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     panelArea.addEventListener('click', function(event) {
         // Cari elemen .image-container terdekat dari elemen yang di-klik
         const imageContainer = event.target.closest('.image-container');
-        
+
         // Jika ditemukan dan memiliki atribut data-line, lakukan navigasi
         if (imageContainer && imageContainer.dataset.line) {
             const lineNumber = imageContainer.dataset.line;
@@ -61,15 +61,58 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Mulai pengambilan data
-    fetchData();
-    setInterval(fetchData, REFRESH_INTERVAL);
+    fetchData(); // <-- Panggil 1x saat halaman dibuka
+    // setInterval(fetchData, REFRESH_INTERVAL); // <-- DIHAPUS
+
+    // Panggil fungsi untuk mendengarkan event dari server
+    initializeEventSource(); // <-- DITAMBAHKAN
+
     updateClock();
     setInterval(updateClock, 1000);
 });
 
+// ==========================================================================
+// Fungsi Baru: Server-Sent Events (SSE)
+// ==========================================================================
+function initializeEventSource() {
+    console.log("Menghubungkan ke server events...");
+    const eventSource = new EventSource('/api/events');
+
+    // Terhubung
+    eventSource.onopen = () => {
+        console.log("✅ Terhubung ke Server-Sent Events.");
+    };
+
+    // Menerima pesan
+    eventSource.onmessage = (event) => {
+        try {
+            const eventData = JSON.parse(event.data);
+
+            // Hanya refresh jika itu adalah sinyal "data_update"
+            if (eventData.type === "data_update") {
+                console.log("🔔 Menerima sinyal update dari server. Mengambil data baru...");
+                fetchData(); // <-- INI INTINYA! Hanya fetch saat ada update
+            } else if (eventData.type === "connected") {
+                console.log("🔌 Pesan koneksi SSE diterima.");
+            }
+        } catch (err) {
+            console.warn("Menerima data SSE non-JSON:", event.data);
+        }
+    };
+
+    // Error
+    eventSource.onerror = (err) => {
+        console.error("❌ Koneksi SSE error, mencoba menghubungkan ulang...", err);
+        eventSource.close();
+        // Coba konek ulang setelah 5 detik
+        setTimeout(initializeEventSource, 5000);
+    };
+}
+
 
 // ==========================================================================
 // Fungsi Pengambilan & Pembaruan Data
+// (Fungsi ini tidak berubah, hanya cara pemanggilannya yang berubah)
 // ==========================================================================
 async function fetchData() {
     try {
@@ -96,6 +139,7 @@ function updateDashboardUI(linesData) {
 
 // ==========================================================================
 // Manajemen Suara
+// (Tidak ada perubahan di sini)
 // ==========================================================================
 function manageAlertSound(shouldPlay) {
     if (shouldPlay && !isMuted && soundUnlocked && !isSoundLooping) {
@@ -120,6 +164,7 @@ function playAlertSound() {
 
 // ==========================================================================
 // Fungsi Pembaruan UI per Panel
+// (Tidak ada perubahan di sini)
 // ==========================================================================
 function updateSinglePanel(lineNumber, data) {
     const status_normalized = normalizeStatus(data.is_critical_alert ? 'Defective' : data.status);
@@ -135,7 +180,7 @@ function updateSinglePanel(lineNumber, data) {
     document.getElementById(`detail_machine_defect_${lineNumber}`).textContent = details.machine_defect;
     document.getElementById(`detail_inspect_${lineNumber}`).textContent = details.inspection_result;
     document.getElementById(`detail_review_${lineNumber}`).textContent = details.review_result;
-    
+
     const imageContainer = document.getElementById(`image_container_${lineNumber}`);
     imageContainer.className = `image-container status-${status_normalized}`;
     const imageContent = data.image_url ?
@@ -154,7 +199,7 @@ function updateSinglePanel(lineNumber, data) {
     ppmEl.textContent = kpi.ppm;
     ppmEl.classList.toggle('kpi-good', kpi.ppm <= TARGET_PPM);
     ppmEl.classList.toggle('kpi-bad', kpi.ppm > TARGET_PPM);
-    
+
     document.getElementById(`kpi_inspected_${lineNumber}`).textContent = kpi.total_inspected;
     document.getElementById(`kpi_pass_${lineNumber}`).textContent = kpi.total_pass;
     document.getElementById(`kpi_false_call_${lineNumber}`).textContent = kpi.total_false_call;
@@ -164,6 +209,7 @@ function updateSinglePanel(lineNumber, data) {
 }
 
 // *** FUNGSI CHART DIPERBARUI ***
+// (Tidak ada perubahan di sini)
 function updateComparisonChart(lineNumber, data) {
     const chartId = `comparisonChart_${lineNumber}`;
     const canvas = document.getElementById(chartId);
@@ -198,11 +244,11 @@ function updateComparisonChart(lineNumber, data) {
                 maintainAspectRatio: false,
                 scales: {
                     x: { ticks: { color: '#e2e8f0', font: { size: 12 } }, grid: { display: false } },
-                    y: { 
+                    y: {
                         display: true, // Tampilkan sumbu Y
-                        beginAtZero: true, 
+                        beginAtZero: true,
                         max: 100, // Skala 0-100%
-                        ticks: { color: '#94a3b8', stepSize: 25 }, 
+                        ticks: { color: '#94a3b8', stepSize: 25 },
                         grid: { color: '#ffffff20', drawBorder: false }
                     }
                 },
@@ -231,6 +277,7 @@ function updateComparisonChart(lineNumber, data) {
 
 // ==========================================================================
 // Fungsi Utilitas
+// (Tidak ada perubahan di sini)
 // ==========================================================================
 function updateClock() {
     const now = new Date();

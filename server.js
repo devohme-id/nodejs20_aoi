@@ -11,6 +11,7 @@ import rateLimit from "express-rate-limit";
 // Import API routes
 import dashboardRouter from "./api/get_dashboard_data.js";
 import imageRouter from "./api/get_image.js";
+import eventRouter from "./api/events.js";
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -38,6 +39,7 @@ const apiLimiter = rateLimit({
 // ======================================================
 app.use("/api/dashboard", apiLimiter, dashboardRouter);
 app.use("/api/image", imageRouter);
+app.use("/api/events", eventRouter);
 
 // ======================================================
 // Serve Static Frontend
