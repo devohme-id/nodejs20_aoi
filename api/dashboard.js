@@ -106,7 +106,8 @@ function calculateKpiMetrics(result) {
     total_pass: pass,
     total_defect: defect,
     total_false_call: falseCall,
-    pass_rate: inspected > 0 ? Number(((pass / inspected) * 100).toFixed(2)) : 0,
+    pass_rate:
+      inspected > 0 ? Number(((pass / inspected) * 100).toFixed(2)) : 0,
     ppm: inspected > 0 ? Math.round((defect / inspected) * 1000000) : 0,
   };
 }
@@ -209,11 +210,15 @@ async function processLine(lineNumber, panelData, conn) {
       }
     } else {
       // If cycle/lot/assembly not available, we leave KPI defaults
-      if (debugMode) console.log(`Line ${lineNumber} missing assembly/lot/cycle.`);
+      if (debugMode)
+        console.log(`Line ${lineNumber} missing assembly/lot/cycle.`);
     }
   } catch (err) {
     // Per-line errors shouldn't break whole payload — log and return defaults/enhanced info
-    console.error(`Error processing line ${lineNumber}:`, err.stack || err.message);
+    console.error(
+      `Error processing line ${lineNumber}:`,
+      err.stack || err.message
+    );
   }
 
   return lineData;

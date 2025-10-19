@@ -2,32 +2,8 @@
 import express from "express";
 import fs from "fs";
 import path from "path";
-import os from "os";
 
 const router = express.Router();
-
-// Path mapping Linux & macOS
-const LINUX_PATHS = {
-  1: "/mnt/qx600_1",
-  2: "/mnt/qx600_2",
-  3: "/mnt/qx600_3",
-  4: "/mnt/qx600_4",
-  5: "/mnt/qx600_5",
-  6: "/mnt/qx600_6",
-};
-
-// Path mapping Windows (jika nanti server pindah OS)
-const WINDOWS_PATHS = {
-  1: "\\\\192.168.0.19\\qx600\\QX600\\Images\\ExportedImages",
-  2: "\\\\192.168.0.21\\qx600\\Images\\ExportedImages\\ExportedImages",
-  3: "\\\\192.168.0.29\\qx600\\Images\\ExportedImages",
-  4: "\\\\192.168.0.25\\qx600\\Images\\ExportedImages",
-  5: "\\\\192.168.0.35\\D_Drive\\QX600\\Images\\ExportedImages",
-  6: "\\\\192.168.0.23\\D_Drive\\QX600\\Images\\ExportedImages",
-};
-
-// Deteksi OS
-const isWindows = os.platform().startsWith("win");
 
 // Cache untuk path check agar gak sering I/O
 const cache = new Map();
@@ -51,7 +27,8 @@ router.get("/", (req, res) => {
     return res.status(400).send("Invalid parameters.");
   }
 
-  const basePath = isWindows ? WINDOWS_PATHS[line] : LINUX_PATHS[line];
+  // *** PERBAIKAN: Baca path dari environment variables ***
+  const basePath = process.env[`LINE_${line}_IMAGE_PATH`];
   if (!basePath) {
     return res.status(404).send("Invalid line ID.");
   }

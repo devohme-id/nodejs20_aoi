@@ -28,7 +28,7 @@ let lastTimestamps = new Map(); // Menyimpan timestamp terakhir yang kita lihat
 
 // Fungsi untuk mengirim update ke semua client yang terhubung
 function sendEventToClients(data) {
-  clients.forEach(client => {
+  clients.forEach((client) => {
     // Format SSE: "data: {json_string}\n\n"
     client.res.write(`data: ${JSON.stringify(data)}\n\n`);
   });
@@ -39,7 +39,9 @@ async function pollDatabase() {
   let conn;
   try {
     conn = await pool.getConnection();
-    const [rows] = await conn.query("SELECT LineID, LastUpdated FROM DashboardEvents");
+    const [rows] = await conn.query(
+      "SELECT LineID, LastUpdated FROM DashboardEvents"
+    );
 
     let hasUpdate = false;
 
@@ -60,7 +62,6 @@ async function pollDatabase() {
       // Kirim sinyal "update" ke semua client
       sendEventToClients({ type: "data_update", timestamp: Date.now() });
     }
-
   } catch (err) {
     console.error("❌ Error polling DashboardEvents:", err.message);
   } finally {
@@ -77,12 +78,12 @@ router.get("/", (req, res) => {
   // Set header untuk koneksi SSE
   res.writeHead(200, {
     "Content-Type": "text/event-stream",
-    "Connection": "keep-alive",
+    Connection: "keep-alive",
     "Cache-Control": "no-cache",
   });
 
   // Kirim pesan "connected"
-  res.write("data: {\"type\":\"connected\"}\n\n");
+  res.write('data: {"type":"connected"}\n\n');
 
   // Simpan koneksi client
   const clientId = Date.now();
@@ -92,8 +93,10 @@ router.get("/", (req, res) => {
 
   // Saat client disconnect
   req.on("close", () => {
-    clients = clients.filter(client => client.id !== clientId);
-    console.log(`🔌 Client SSE terputus: ${clientId}. Total: ${clients.length}`);
+    clients = clients.filter((client) => client.id !== clientId);
+    console.log(
+      `🔌 Client SSE terputus: ${clientId}. Total: ${clients.length}`
+    );
   });
 });
 

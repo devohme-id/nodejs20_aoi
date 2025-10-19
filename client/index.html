@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart AOI Dashboard</title>
+    <link rel="stylesheet" href="/src/css/style.css" />
+  </head>
+  <body>
+    <header class="header-ui">
+      <div>
+        <h1 class="header-title">Smart AOI Dashboard</h1>
+        <p class="header-subtitle">Real-time Production Monitoring</p>
+      </div>
+      <div class="header-clock-area">
+        <button id="sound-toggle-btn" class="btn-report sound-btn muted">
+          <!-- SVG icons for sound on/off -->
+        </button>
+        <div id="clock" class="header-clock"></div>
+      </div>
+    </header>
+    <main id="panel-area" class="panel-area"></main>
+    <audio id="alert-sound" src="/sounds/alert.mp3" preload="auto"></audio>
+    <script type="module" src="/src/js/main.js"></script>
+  </body>
+</html>

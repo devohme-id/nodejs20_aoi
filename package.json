@@ -1,16 +1,28 @@
 {
   "name": "smart-aoi-dashboard",
   "version": "1.0.0",
-  "description": "Smart AOI Dashboard in Node.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "dev": "concurrently \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:client": "vite",
+    "dev:server": "nodemon server.js",
+    "build": "vite build",
+    "start": "cross-env NODE_ENV=production node server.js",
+    "prod": "pm2 start ecosystem.config.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^4.19.2",
-    "express-rate-limit": "^8.1.0",
-    "mysql2": "^3.9.3"
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "mysql2": "^3.15.2",
+    "chart.js": "^4.5.1",
+    "chartjs-plugin-datalabels": "^2.2.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "nodemon": "^3.0.2",
+    "vite": "^5.0.0"
   }
 }
