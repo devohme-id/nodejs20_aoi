@@ -7,20 +7,21 @@
     <title>Smart AOI Dashboard</title>
   </head>
   <body>
-    <header class="bg-gray-800 text-white py-4 px-6 shadow-md flex justify-between items-center">
+    <!-- PERBAIKAN: Mengganti 'gray' menjadi 'slate' agar sesuai dengan tema warna lama (cool gray) -->
+    <header class="bg-slate-800 text-white py-2 px-6 shadow-md flex justify-between items-center">
       <div>
-        <h1 class="text-2xl font-semibold">Smart AOI Dashboard</h1>
+        <h1 class="text-xl font-semibold uppercase">Smart AOI Dashboard</h1>
         <p class="text-sm">Real-time Production Monitoring</p>
       </div>
       <div class="flex items-center gap-4">
-        <button id="sound-toggle-btn" class="sound-btn muted">
-          <svg class="unmuted-icon h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.348 2.595.341 1.24 1.518 1.905 2.66 1.905H6.44l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.584 5.106a.75.75 0 011.06 0c3.099 3.099 3.099 8.191 0 11.29a.75.75 0 11-1.06-1.06 6.75 6.75 0 000-9.171.75.75 0 010-1.06z" /><path d="M15.932 7.757a.75.75 0 011.061 0 4.5 4.5 0 010 6.364.75.75 0 11-1.06-1.061 3 3 0 000-4.242.75.75 0 010-1.061z" /></svg>
-          <svg class="muted-icon h-6 w-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.348 2.595.341 1.24 1.518 1.905 2.66 1.905H6.44l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM17.78 9.22a.75.75 0 10-1.06 1.06L18.44 12l-1.72 1.72a.75.75 0 101.06 1.06L19.5 13.06l1.72 1.72a.75.75 0 101.06-1.06L20.56 12l1.72-1.72a.75.75 0 10-1.06-1.06L19.5 10.94l-1.72-1.72z" /></svg>
+        <button id="sound-toggle-btn" class="group muted flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg p-2 shadow-lg transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-xl active:translate-y-0 active:shadow-md bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-800 group-[.muted]:bg-none group-[.muted]:bg-slate-600 group-[.muted]:text-slate-200">
+          <svg class="h-5 w-5 group-[.muted]:hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.348 2.595.341 1.24 1.518 1.905 2.66 1.905H6.44l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.584 5.106a.75.75 0 011.06 0c3.099 3.099 3.099 8.191 0 11.29a.75.75 0 11-1.06-1.06 6.75 6.75 0 000-9.171.75.75 0 010-1.06z" /><path d="M15.932 7.757a.75.75 0 011.061 0 4.5 4.5 0 010 6.364.75.75 0 11-1.06-1.061 3 3 0 000-4.242.75.75 0 010-1.061z" /></svg>
+          <svg class="hidden h-5 w-5 group-[.muted]:block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4.508c-1.141 0-2.318.664-2.66 1.905A9.76 9.76 0 001.5 12c0 .898.121 1.768.348 2.595.341 1.24 1.518 1.905 2.66 1.905H6.44l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM17.78 9.22a.75.75 0 10-1.06 1.06L18.44 12l-1.72 1.72a.75.75 0 101.06 1.06L19.5 13.06l1.72 1.72a.75.75 0 101.06-1.06L20.56 12l1.72-1.72a.75.75 0 10-1.06-1.06L19.5 10.94l-1.72-1.72z" /></svg>
         </button>
         <div id="clock" class="text-lg font-mono"></div>
       </div>
     </header>
-    <main id="panel-area" class="container mx-auto py-6"></main>
+    <main id="panel-area" class="flex-grow p-1 grid grid-cols-3 grid-rows-2 gap-2 overflow-hidden bg-slate-700"></main>
     <audio id="alert-sound" src="/src/assets/sounds/alarm.wav" preload="auto"></audio>
     <script type="module" src="/src/js/main.js"></script>
   </body>
