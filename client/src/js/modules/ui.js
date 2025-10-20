@@ -30,8 +30,8 @@ export function createPanelHTML(lineNumber) {
             <h2 class="text-xl font-bold font-headline text-slate-300">LINE ${lineNumber}</h2>
             <span id="panel_status_${lineNumber}" class="py-1 px-4 rounded-lg text-sm font-bold uppercase text-slate-200 bg-slate-600">INACTIVE</span>
         </div>
-        <div class="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-6 items-center min-h-0">
-            <div class="text-sm flex flex-col gap-1.5 min-w-0">
+        <div class="grid grid-cols-2 gap-4 items-center min-h-0">
+            <div class="text-xs flex flex-col gap-1 min-w-0">
                 <div class="grid grid-cols-[85px_1fr] items-center gap-3"><span class="text-slate-300">Assembly</span><strong id="detail_assembly_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</strong></div>
                 <hr class="border-slate-700 my-1">
                 <div class="grid grid-cols-[85px_1fr] items-center gap-3"><span class="text-slate-300">Time</span><span id="detail_time_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</span></div>
@@ -41,7 +41,7 @@ export function createPanelHTML(lineNumber) {
                 <div class="grid grid-cols-[85px_1fr] items-center gap-3"><span class="text-slate-300">Inspection</span><span id="detail_inspect_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</span></div>
                 <div class="grid grid-cols-[85px_1fr] items-center gap-3"><span class="text-slate-300">Review</span><span id="detail_review_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</span></div>
             </div>
-            <div id="image_container_${lineNumber}" class="relative w-full h-full bg-black/20 rounded-lg overflow-hidden border-[3px] border-slate-700 shadow-transparent transition-all duration-300 ease-in-out cursor-pointer hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]" data-line="${lineNumber}"></div>
+            <div id="image_container_${lineNumber}" class="relative object-scale-down  bg-black/20 rounded-lg overflow-hidden border-[3px] border-slate-700 shadow-transparent transition-all duration-300 ease-in-out cursor-pointer hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]" data-line="${lineNumber}"></div>
         </div>
         <div class="grid grid-cols-5 gap-2">
             <div class="bg-slate-900/50 rounded p-1 text-center"><div id="kpi_pass_rate_${lineNumber}" class="text-xl font-bold transition-colors duration-300">0%</div><div class="text-[0.65rem] uppercase text-slate-300">Pass Rate</div></div>
@@ -50,7 +50,7 @@ export function createPanelHTML(lineNumber) {
             <div class="bg-slate-900/50 rounded p-1 text-center"><div id="kpi_pass_${lineNumber}" class="text-xl font-bold text-green-500">0</div><div class="text-[0.65rem] uppercase text-slate-300">Pass</div></div>
             <div class="bg-slate-900/50 rounded p-1 text-center"><div id="kpi_false_call_${lineNumber}" class="text-xl font-bold text-yellow-400">0</div><div class="text-[0.65rem] uppercase text-slate-300">False Call</div></div>
         </div>
-        <div class="relative w-full min-h-0">
+        <div class="relative w-full h-20">
             <canvas id="comparisonChart_${lineNumber}"></canvas>
         </div>
     </div>`;
