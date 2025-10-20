@@ -9,9 +9,8 @@ export default defineConfig({
     // Port untuk Vite Dev Server
     port: 5173,
     proxy: {
-      // Mengarahkan request API ke backend server Express
       '/api': {
-        target: 'http://localhost:3000', // Sesuaikan dengan port backend Anda
+        target: 'http://localhost:3000', // <-- Ini intinya
         changeOrigin: true,
       },
     },

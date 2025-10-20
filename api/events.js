@@ -1,14 +1,16 @@
 /**
  * @file Defines the event-related API endpoints for the Smart AOI Dashboard.
  * Handles server-sent events (SSE) to push real-time updates to connected clients.
+ * (Fastify Version)
  */
-import express from "express";
+// FASTIFY: Hapus import express
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 dotenv.config();
-const router = express.Router();
+// FASTIFY: 'router' tidak lagi digunakan.
 
 /** @const {mysql.Pool} pool Database connection pool for polling events */
+// (TIDAK BERUBAH)
 const pool = mysql.createPool({
   host: process.env.DB_HOST || "127.0.0.1",
   user: process.env.DB_USER || "root",
@@ -24,17 +26,18 @@ let clients = [];
 /** @type {Map} lastTimestamps - Stores the last seen timestamp for each line */
 let lastTimestamps = new Map();
 
-// Fungsi untuk mengirim update ke semua client yang terhubung
 /**
  * Sends an event to all connected clients.
  * @param {object} data - The data to send to the clients.
  */
 function sendEventToClients(data) {
+  // FASTIFY: Menggunakan client.reply.raw untuk menulis ke stream
   clients.forEach((client) => {
-    client.res.write(`data: ${JSON.stringify(data)}\n\n`);
+    client.reply.raw.write(`data: ${JSON.stringify(data)}\n\n`);
   });
 }
 
+// (Fungsi pollDatabase TIDAK BERUBAH karena logikanya independen dari framework)
 async function pollDatabase() {
   let conn;
   try {
@@ -42,21 +45,17 @@ async function pollDatabase() {
     const [rows] = await conn.query(
       "SELECT LineID, LastUpdated FROM DashboardEvents"
     );
-
     let hasUpdate = false;
-
     for (const row of rows) {
       const lineID = row.LineID;
       const dbTimestamp = new Date(row.LastUpdated).getTime();
       const lastSeenTimestamp = lastTimestamps.get(lineID) || 0;
-
       if (dbTimestamp > lastSeenTimestamp) {
         hasUpdate = true;
         lastTimestamps.set(lineID, dbTimestamp);
         console.log(`⚡ Event: Update terdeteksi di Line ${lineID}`);
       }
     }
-
     if (hasUpdate) {
       sendEventToClients({ type: "data_update", timestamp: Date.now() });
     }
@@ -67,46 +66,57 @@ async function pollDatabase() {
   }
 }
 
-/**
- * SSE endpoint that keeps a persistent connection open with clients.
- */
-const pollingInterval = setInterval(pollDatabase, 1500);
 /** @const {setInterval} pollingInterval - Interval to poll the database */
-// Endpoint utama SSE
-router.get("/", (req, res) => {
-  // Set header untuk koneksi SSE
-  res.writeHead(200, {
-    "Content-Type": "text/event-stream",
-    Connection: "keep-alive",
-    "Cache-Control": "no-cache",
-  });
+const pollingInterval = setInterval(pollDatabase, 1500);
 
-  // Kirim pesan "connected"
-  res.write('data: {"type":"connected"}\n\n');
+// ======================================================
+// FASTIFY: Definisikan rute sebagai Plugin
+// ======================================================
+async function eventRoutes(fastify, options) {
+  // Endpoint utama SSE
+  // FASTIFY: Rute tidak mengembalikan apa-apa karena koneksi tetap terbuka
+  fastify.get("/", (request, reply) => {
+    // FASTIFY: Set header secara manual menggunakan objek 'raw' response dari Node.js
+    const headers = {
+      "Content-Type": "text/event-stream",
+      Connection: "keep-alive",
+      "Cache-Control": "no-cache",
+    };
+    reply.raw.writeHead(200, headers);
 
-  // Simpan koneksi client
-  const clientId = Date.now();
-  const newClient = { id: clientId, res: res };
-  clients.push(newClient);
-  console.log(`✅ Client SSE terhubung: ${clientId}. Total: ${clients.length}`);
+    // Kirim pesan "connected"
+    reply.raw.write('data: {"type":"connected"}\n\n');
 
-  // ✨ OPTIMASI: Kirim "heartbeat" setiap 20 detik untuk menjaga koneksi tetap hidup
-  // Beberapa proxy atau load balancer akan memutus koneksi yang idle.
-  const keepAliveInterval = setInterval(() => {
-    res.write(": keep-alive\n\n");
-  }, 20000);
-
-  // Saat client disconnect
-  req.on("close", () => {
-    // Hentikan interval heartbeat untuk client ini
-    clearInterval(keepAliveInterval);
-
-    clients = clients.filter((client) => client.id !== clientId);
+    // Simpan koneksi client
+    const clientId = Date.now();
+    // FASTIFY: Simpan objek 'reply' dari Fastify, bukan 'res' dari Express
+    const newClient = { id: clientId, reply: reply };
+    clients.push(newClient);
     console.log(
-      `🔌 Client SSE terputus: ${clientId}. Total: ${clients.length}`
+      `✅ Client SSE terhubung: ${clientId}. Total: ${clients.length}`
     );
+
+    // ✨ OPTIMASI: Kirim "heartbeat" setiap 20 detik untuk menjaga koneksi tetap hidup
+    const keepAliveInterval = setInterval(() => {
+      // Pastikan koneksi masih terbuka sebelum menulis
+      if (!reply.raw.writableEnded) {
+        reply.raw.write(": keep-alive\n\n");
+      }
+    }, 20000);
+
+    // Saat client disconnect
+    // FASTIFY: Gunakan 'request.raw' untuk mengakses event 'close' dari Node.js
+    request.raw.on("close", () => {
+      // Hentikan interval heartbeat untuk client ini
+      clearInterval(keepAliveInterval);
+
+      clients = clients.filter((client) => client.id !== clientId);
+      console.log(
+        `🔌 Client SSE terputus: ${clientId}. Total: ${clients.length}`
+      );
+    });
   });
-});
+}
 
 /**
  * Gracefully shuts down the SSE module.
@@ -116,11 +126,17 @@ export async function shutdownEvents() {
   // 1. Hentikan polling database
   clearInterval(pollingInterval);
   // 2. Tutup semua koneksi client SSE yang aktif
-  clients.forEach((client) => client.res.end());
+  // FASTIFY: Gunakan client.reply.raw.end()
+  clients.forEach((client) => {
+    if (!client.reply.raw.writableEnded) {
+      client.reply.raw.end();
+    }
+  });
   clients = []; // Kosongkan array
   // 3. Tutup koneksi pool database
   await pool.end();
   console.log("✅ SSE module shut down gracefully.");
 }
 
-export default router;
+// FASTIFY: Ekspor fungsi plugin sebagai default
+export default eventRoutes;

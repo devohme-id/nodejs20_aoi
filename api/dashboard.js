@@ -1,26 +1,16 @@
-// File: api/get_dashboard_data.js
-import express from "express";
-import mysql from "mysql2/promise";
+// File: api/dashboard.js (Fastify Version with @fastify/mysql)
+
+// Hapus import 'mysql2/promise' karena sudah dihandle plugin
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const router = express.Router();
 const debugMode = process.env.DEBUG_MODE === "true";
 
 // ======================================================
-// Config: Database Pool (use env vars, jangan hardcode creds)
+// Config: Database Pool
 // ======================================================
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || "127.0.0.1",
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASS || "",
-  database: process.env.DB_NAME || "aoi_dashboard",
-  waitForConnections: true,
-  connectionLimit: parseInt(process.env.DB_CONN_LIMIT || "10", 10),
-  queueLimit: 0,
-  timezone: "Z", // store as UTC in node; format when returning
-});
+// (DIHAPUS! Ini sekarang ditangani oleh server.js)
 
 // ======================================================
 // Simple in-memory cache (optional)
@@ -45,6 +35,11 @@ function setCache(key, value, ttl = CACHE_TTL_MS) {
 // ======================================================
 // Constants & Helpers
 // ======================================================
+// (Semua fungsi helper Anda tetap di sini: CRITICAL_DEFECTS,
+// jakartaFormatter, createDefaultDetails, createDefaultKpi,
+// createDefaultComparison, calculateKpiMetrics)
+// ... (Saya sembunyikan agar ringkas) ...
+
 const CRITICAL_DEFECTS = [
   "SHORT SOLDER",
   "POOR SOLDER",
@@ -85,14 +80,12 @@ function createDefaultKpi() {
     ppm: 0,
   };
 }
-
 function createDefaultComparison() {
   return {
     before: createDefaultKpi(),
     current: createDefaultKpi(),
   };
 }
-
 function calculateKpiMetrics(result) {
   const inspected = Number(result.Inspected || 0);
   const pass = Number(result.Pass || 0);
@@ -111,7 +104,6 @@ function calculateKpiMetrics(result) {
     ppm: inspected > 0 ? Math.round((defect / inspected) * 1000000) : 0,
   };
 }
-
 // ======================================================
 // DB Queries (as constants to keep code tidy)
 // ======================================================
@@ -134,7 +126,6 @@ const KPI_AGG_SQL = `
   WHERE LineID = ? AND Assembly = ? AND LotCode = ? AND TuningCycleID = ?
   GROUP BY Assembly, LotCode
 `;
-
 // ======================================================
 // Helper: Process one line (can be run in parallel)
 // ======================================================
@@ -223,7 +214,6 @@ async function processLine(lineNumber, panelData, conn) {
 
   return lineData;
 }
-
 // ======================================================
 // Main: getDashboardData (using parallel processing)
 // ======================================================
@@ -253,30 +243,50 @@ async function getDashboardData(conn) {
 }
 
 // ======================================================
-// Route: GET / (with pool & caching)
+// FASTIFY: Definisikan rute sebagai Plugin
 // ======================================================
-router.get("/", async (req, res) => {
-  // Try cache first
-  const cached = getFromCache("dashboard");
-  if (cached) return res.json(cached);
+async function dashboardRoutes(fastify, options) {
 
-  let conn;
-  try {
-    conn = await pool.getConnection();
+  // ======================================================
+  // Route: GET / (with pool & caching)
+  // =Details: INILAH BAGIAN YANG DIPERBAIKI
+  // ======================================================
+  fastify.get("/", async (request, reply) => {
+    // Try cache first
+    const cached = getFromCache("dashboard");
+    if (cached) {
+      // ✅ BENAR: Cukup return object
+      return cached;
+    }
 
-    // Run main data fetch
-    const data = await getDashboardData(conn);
+    let conn;
+    try {
+      // Dapatkan koneksi dari plugin
+      conn = await fastify.mysql.getConnection();
 
-    // Set cache (if TTL > 0)
-    if (CACHE_TTL_MS > 0) setCache("dashboard", data, CACHE_TTL_MS);
+      // Run main data fetch
+      const data = await getDashboardData(conn);
 
-    return res.json(data);
-  } catch (err) {
-    console.error("❌ API Error:", err.stack || err.message);
-    return res.status(500).json({ error: `API Error: ${err.message}` });
-  } finally {
-    if (conn) conn.release();
-  }
-});
+      // Set cache (if TTL > 0)
+      if (CACHE_TTL_MS > 0) setCache("dashboard", data, CACHE_TTL_MS);
 
-export default router;
+      // ✅ BENAR: Cukup return object. Fastify akan mengubahnya
+      // menjadi JSON secara otomatis.
+      //
+      // ❌ SALAH: Jangan gunakan 'res.json(data)' atau 'response.json(data)'
+      return data;
+
+    } catch (err) {
+      console.error("❌ API Error:", err.stack || err.message);
+
+      // ✅ BENAR: Lempar error. Error handler global
+      // di server.js akan menangkap ini.
+      throw new Error(`API Error: ${err.message}`);
+    } finally {
+      if (conn) conn.release();
+    }
+  });
+}
+
+// FASTIFY: Ekspor fungsi plugin-nya
+export default dashboardRoutes;
