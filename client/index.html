@@ -5,9 +5,9 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Smart AOI Dashboard</title>
+    <link href="src/css/style.css" rel="stylesheet">
   </head>
   <body>
-    <!-- PERBAIKAN: Mengganti 'gray' menjadi 'slate' agar sesuai dengan tema warna lama (cool gray) -->
     <header class="bg-slate-800 text-white py-2 px-6 shadow-md flex justify-between items-center">
       <div>
         <h1 class="text-xl font-semibold uppercase">Smart AOI Dashboard</h1>
@@ -22,7 +22,7 @@
       </div>
     </header>
     <main id="panel-area" class="flex-grow p-1 grid grid-cols-3 grid-rows-2 gap-2 overflow-hidden bg-slate-700"></main>
-    <audio id="alert-sound" src="/src/assets/sounds/alarm.wav" preload="auto"></audio>
-    <script type="module" src="/src/js/main.js"></script>
+    <audio id="alert-sound" src="src/assets/sounds/alarm.wav" preload="auto"></audio>
+    <script type="module" src="src/js/main.js"></script>
   </body>
 </html>

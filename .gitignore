@@ -1,3 +1,4 @@
 /node_modules
 /public/assets/sounds/alarm.wav
+/dist
 .env
