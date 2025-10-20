@@ -152,6 +152,16 @@ export function updateDashboardUI(linesData) {
 
 export function updateClock() {
     const now = new Date();
-    document.getElementById('clock').textContent = now.toLocaleTimeString('id-ID', { hour12: false });
-    document.getElementById('date').textContent = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const clockEl = document.getElementById('clock');
+    const dateEl = document.getElementById('date');
+
+    // ✅ FIX: Periksa apakah elemen ada sebelum mengubah isinya
+    // Ini mencegah error jika elemen 'clock' atau 'date' tidak ditemukan di HTML.
+    if (clockEl) {
+        clockEl.textContent = now.toLocaleTimeString('id-ID', { hour12: false });
+    }
+
+    if (dateEl) {
+        dateEl.textContent = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    }
 }

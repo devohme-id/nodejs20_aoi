@@ -2,11 +2,12 @@
 // Smart AOI Dashboard - Node.js Server
 // ======================================================
 import express from "express";
+import "dotenv/config"; // ✅ BEST PRACTICE: Load env vars di paling awal
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-import dotenv from "dotenv";
 import rateLimit from "express-rate-limit";
+import logger from "./utils/logger.js"; // ✨ NEW: Import logger terpusat
 
 // Import API routes
 import dashboardRouter from "./api/dashboard.js";
@@ -16,7 +17,6 @@ import eventRouter from "./api/events.js";
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-dotenv.config();
 const isProduction = process.env.NODE_ENV === "production";
 
 // ======================================================
@@ -63,8 +63,12 @@ if (isProduction) {
 // Global Error Handler
 // ======================================================
 app.use((err, req, res, next) => {
-  console.error("💥 Uncaught error:", err);
-  res.status(500).json({ error: "Internal Server Error" });
+  logger.error("💥 Uncaught error", err, { url: req.originalUrl });
+
+  const errorResponse = {
+    error: isProduction ? "Internal Server Error" : err.message,
+  };
+  res.status(500).json(errorResponse);
 });
 
 // ======================================================
@@ -72,16 +76,16 @@ app.use((err, req, res, next) => {
 // ======================================================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, "0.0.0.0", () => {
-  console.log("==========================================");
-  console.log("✅ Smart AOI Dashboard Server is running!");
-  console.log(`🌐 http://localhost:${PORT}`);
-  console.log("------------------------------------------");
+  logger.info("==========================================");
+  logger.info("✅ Smart AOI Dashboard Server is running!");
+  logger.info(`🌐 Listening on http://0.0.0.0:${PORT}`);
+  logger.info("------------------------------------------");
 });
 
 // ======================================================
 // Graceful Shutdown
 // ======================================================
 process.on("SIGTERM", () => {
-  console.log("🛑 Server shutting down gracefully...");
+  logger.info("🛑 Server shutting down gracefully...");
   process.exit(0);
 });

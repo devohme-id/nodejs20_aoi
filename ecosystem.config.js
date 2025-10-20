@@ -16,15 +16,17 @@ export default {
         NODE_ENV: "production",
         PORT: 3000,
       },
-      error_file: "/var/log/pm2/smart-aoi-error.log",
-      out_file: "/var/log/pm2/smart-aoi-out.log",
+      // ✅ BEST PRACTICE: Hapus path log absolut. Biarkan PM2 mengelola log di ~/.pm2/logs.
+      // Ini lebih portabel dan menghindari masalah izin pada /var/log.
+      // Log dari logger kustom kita akan otomatis ditangkap oleh PM2.
       merge_logs: true,
       time: true, // Tambahkan timestamp di log
     },
   ],
 
   // ======================================================
-  // Log Rotation (opsional tapi sangat direkomendasikan)
+  // Log Rotation: Untuk rotasi log otomatis, install `pm2-logrotate`
+  // > pm2 install pm2-logrotate
   // ======================================================
   deploy: {}, // tidak dipakai tapi harus ada di ESM export
 };

@@ -71,7 +71,7 @@ async function pollDatabase() {
 
 // Mulai server-side polling (sangat ringan)
 // Cukup cek setiap 2 detik. Jauh lebih ringan daripada N klien x 5 detik.
-setInterval(pollDatabase, 2000);
+setInterval(pollDatabase, 1500);
 
 // Endpoint utama SSE
 router.get("/", (req, res) => {

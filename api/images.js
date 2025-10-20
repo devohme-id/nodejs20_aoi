@@ -2,6 +2,7 @@
 import express from "express";
 import fs from "fs";
 import path from "path";
+import logger from "../utils/logger.js";
 
 const router = express.Router();
 
@@ -59,7 +60,7 @@ router.get("/", (req, res) => {
   stream.pipe(res);
 
   stream.on("error", (err) => {
-    console.error("Error reading image:", err);
+    logger.error("Error reading image stream", err, { imagePath });
     res.status(500).type("text/plain").send("Error reading image");
   });
 });

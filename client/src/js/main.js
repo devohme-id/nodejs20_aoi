@@ -15,59 +15,73 @@ import { manageAlertSound, playAlertSound } from './modules/sound.js';
 // ==========================================================================
 // Inisialisasi Aplikasi
 // ==========================================================================
-document.addEventListener('DOMContentLoaded', () => {
-    Chart.register(ChartDataLabels);
 
-    // Inisialisasi Elemen & State
-    state.setAlertAudio(document.getElementById('alert-sound'));
+/**
+ * Mengatur semua event listener untuk elemen UI.
+ */
+function setupEventListeners() {
     const soundToggleBtn = document.getElementById('sound-toggle-btn');
     const panelArea = document.getElementById('panel-area');
 
-    // Setup Event Listeners
     if (state.alertAudio) {
         state.alertAudio.addEventListener('ended', () => {
             if (state.isSoundLooping) setTimeout(playAlertSound, SOUND_DELAY);
         });
     }
 
-    if (soundToggleBtn) {
-        soundToggleBtn.addEventListener('click', () => {
-            if (!state.soundUnlocked) {
-                state.setSoundUnlocked(true);
-                // Coba mainkan dan jeda audio untuk 'membuka' izin di browser
-                state.alertAudio.play().then(() => state.alertAudio.pause()).catch(() => {});
-            }
-            state.setMuted(!state.isMuted);
-            soundToggleBtn.classList.toggle('muted', state.isMuted);
-            const isCriticalActive = document.querySelector('.critical-alert') !== null;
-            manageAlertSound(isCriticalActive);
-        });
-    }
+    soundToggleBtn?.addEventListener('click', () => {
+        if (!state.soundUnlocked) {
+            state.setSoundUnlocked(true);
+            // Coba mainkan dan jeda audio untuk 'membuka' izin di browser
+            state.alertAudio.play().then(() => state.alertAudio.pause()).catch(() => {});
+        }
+        state.setMuted(!state.isMuted);
+        soundToggleBtn.classList.toggle('muted', state.isMuted);
+        const isCriticalActive = document.querySelector('.critical-alert') !== null;
+        manageAlertSound(isCriticalActive);
+    });
 
-    // Buat struktur HTML awal dan set data default
+    panelArea.addEventListener('click', function(event) {
+        const imageContainer = event.target.closest('.image-container');
+        if (imageContainer && imageContainer.dataset.line) {
+            const lineNumber = imageContainer.dataset.line;
+            // ✅ FIX: Mengarahkan ke halaman HTML, bukan file PHP yang tidak ada.
+            window.location.href = `feedback.html?line=${lineNumber}`;
+        }
+    });
+}
+
+/**
+ * Membuat panel-panel awal untuk setiap line.
+ */
+function initializeDashboard() {
+    const panelArea = document.getElementById('panel-area');
     let content = '';
     const initialLinesData = {};
+
     for (let i = 1; i <= TOTAL_LINES; i++) {
         content += createPanelHTML(i);
         initialLinesData[`line_${i}`] = createDefaultLineData();
     }
     panelArea.innerHTML = content;
-    updateDashboardUI(initialLinesData); // Tampilkan panel kosong
+    updateDashboardUI(initialLinesData); // Tampilkan panel kosong awal
+}
 
-    // Event Delegation untuk klik pada gambar
-    panelArea.addEventListener('click', function(event) {
-        const imageContainer = event.target.closest('.image-container');
-        if (imageContainer && imageContainer.dataset.line) {
-            const lineNumber = imageContainer.dataset.line;
-            window.location.href = `feedback.php?line=${lineNumber}`;
-        }
-    });
+/**
+ * Fungsi utama untuk menjalankan aplikasi.
+ */
+function main() {
+    Chart.register(ChartDataLabels);
+    state.setAlertAudio(document.getElementById('alert-sound'));
 
-    // Mulai Jam Digital
+    initializeDashboard();
+    setupEventListeners();
+
     updateClock();
     setInterval(updateClock, 1000);
 
-    // Mulai pengambilan data dan koneksi SSE
     fetchData();
     initializeEventSource();
-});
+}
+
+document.addEventListener('DOMContentLoaded', main);
