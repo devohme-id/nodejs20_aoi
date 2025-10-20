@@ -21,6 +21,19 @@ function getCachedStat(filePath) {
 }
 
 router.get("/", (req, res) => {
+  // ✨ NEW: Set timeout 1 detik untuk request gambar.
+  res.setTimeout(1000, () => {
+    logger.warn("Image request timed out after 1 seconds", { query: req.query });
+    if (!res.headersSent) {
+      // Jika belum ada data terkirim, kirim status error yang sesuai.
+      res.status(504).type("text/plain").send("Image processing timed out.");
+    } else {
+      // Jika data sudah mulai dikirim, hancurkan koneksi.
+      // Ini akan memicu event 'onerror' di <img> pada frontend.
+      res.socket.destroy();
+    }
+  });
+
   const line = parseInt(req.query.line, 10);
   const date = (req.query.date || "").replace(/[^0-9]/g, "");
   const file = path.basename(req.query.file || "");

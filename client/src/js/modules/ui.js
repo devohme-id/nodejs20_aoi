@@ -116,10 +116,16 @@ function updateSinglePanel(lineNumber, data) {
 
     const imageContainer = document.getElementById(`image_container_${lineNumber}`);
     imageContainer.className = `image-container status-${status_normalized}`;
-    const imageContent = data.image_url ?
-        `<img src="${data.image_url}" alt="Defect" class="defect-image">` :
-        `<div class="pcb-visual-placeholder pcb-visual-${status_normalized}"><span>${data.status === 'INACTIVE' ? 'NO SIGNAL' : data.status}</span></div>`;
+
+    // ✨ NEW: Tambahkan penanganan error jika gambar gagal dimuat (misalnya karena timeout)
+    const errorHtml = `<div class='flex items-center justify-center h-full bg-gray-800/50 text-red-400 text-xs font-semibold p-2 text-center'>Gagal memuat gambar</div>`;
+    const imageContent = data.image_url
+      ? `<img src="${data.image_url}" alt="Defect" class="defect-image" onerror="this.outerHTML=\`${errorHtml}\`">`
+      : `<div class="pcb-visual-placeholder pcb-visual-${status_normalized}"><span>${
+          data.status === "INACTIVE" ? "NO SIGNAL" : data.status
+        }</span></div>`;
     imageContainer.innerHTML = imageContent;
+
     imageContainer.classList.toggle('critical-alert', data.is_critical_alert);
 
     const passRateEl = document.getElementById(`kpi_pass_rate_${lineNumber}`);
