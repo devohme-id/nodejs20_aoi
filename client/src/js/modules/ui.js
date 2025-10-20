@@ -32,16 +32,16 @@ export function createPanelHTML(lineNumber) {
         </div>
         <div class="grid grid-cols-2 gap-4 items-center min-h-0">
             <div class="text-xs flex flex-col gap-1 min-w-0">
-                <div class="grid grid-cols-[85px_1fr] items-center gap-3"><span class="text-slate-300">Assembly</span><strong id="detail_assembly_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</strong></div>
+                <div class="grid grid-cols-[85px_1fr] items-center gap-y-3"><span class="text-slate-300">Assembly</span><strong id="detail_assembly_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</strong></div>
                 <hr class="border-slate-700 my-1">
-                <div class="grid grid-cols-[85px_1fr] items-center gap-3"><span class="text-slate-300">Time</span><span id="detail_time_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</span></div>
-                <div class="grid grid-cols-[85px_1fr] items-center gap-3"><span class="text-slate-300">Reference</span><span id="detail_ref_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</span></div>
-                <div class="grid grid-cols-[85px_1fr] items-center gap-3"><span class="text-slate-300">Partnumber</span><span id="detail_part_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</span></div>
-                <div class="grid grid-cols-[85px_1fr] items-center gap-3"><span class="text-slate-300">Defect</span><span id="detail_machine_defect_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</span></div>
-                <div class="grid grid-cols-[85px_1fr] items-center gap-3"><span class="text-slate-300">Inspection</span><span id="detail_inspect_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</span></div>
-                <div class="grid grid-cols-[85px_1fr] items-center gap-3"><span class="text-slate-300">Review</span><span id="detail_review_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</span></div>
+                <div class="grid grid-cols-[85px_1fr] items-center gap-y-3"><span class="text-slate-300">Time</span><span id="detail_time_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</span></div>
+                <div class="grid grid-cols-[85px_1fr] items-center gap-y-3"><span class="text-slate-300">Reference</span><span id="detail_ref_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</span></div>
+                <div class="grid grid-cols-[85px_1fr] items-center gap-y-3"><span class="text-slate-300">Partnumber</span><span id="detail_part_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</span></div>
+                <div class="grid grid-cols-[85px_1fr] items-center gap-y-3"><span class="text-slate-300">Defect</span><span id="detail_machine_defect_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</span></div>
+                <div class="grid grid-cols-[85px_1fr] items-center gap-y-3"><span class="text-slate-300">Inspection</span><span id="detail_inspect_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</span></div>
+                <div class="grid grid-cols-[85px_1fr] items-center gap-y-3"><span class="text-slate-300">Review</span><span id="detail_review_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</span></div>
             </div>
-            <div id="image_container_${lineNumber}" class="relative size-full object-center object-scale-down bg-black/20 rounded-lg border-[3px] border-slate-700 shadow-transparent transition-all duration-300 ease-in-out cursor-pointer hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]" data-line="${lineNumber}"></div>
+            <div id="image_container_${lineNumber}" class="relative size-full flex items-center justify-center bg-black/20 rounded-lg border-[3px] border-slate-700 shadow-transparent transition-all duration-300 ease-in-out cursor-pointer hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]" data-line="${lineNumber}"></div>
         </div>
         <div class="grid grid-cols-5 gap-2">
             <div class="bg-slate-900/50 rounded p-1 text-center"><div id="kpi_pass_rate_${lineNumber}" class="text-md font-bold transition-colors duration-300">0%</div><div class="text-[0.65rem] uppercase text-slate-300">Pass Rate</div></div>
@@ -139,7 +139,7 @@ function updateSinglePanel(lineNumber, data) {
     document.getElementById(`detail_review_${lineNumber}`).textContent = details.review_result;
 
     const imageContainer = document.getElementById(`image_container_${lineNumber}`);
-    const baseImageContainerClass = 'relative w-full h-full bg-black/20 rounded-lg overflow-hidden border-[3px] transition-all duration-300 ease-in-out cursor-pointer hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]';
+    const baseImageContainerClass = 'relative flex items-center justify-center w-full h-full bg-black/20 rounded-lg overflow-hidden border-[3px] transition-all duration-300 ease-in-out cursor-pointer hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]';
     const statusImageClasses = imageStatusClasses[status_normalized] || imageStatusClasses.inactive;
     const shadowEffectClass = status_normalized !== 'inactive' ? 'shadow-[0_0_15px_var(--tw-shadow-color)]' : '';
     imageContainer.className = `${baseImageContainerClass} ${statusImageClasses} ${shadowEffectClass}`;
@@ -149,7 +149,7 @@ function updateSinglePanel(lineNumber, data) {
     const placeholderBaseClass = 'w-full h-full flex justify-center items-center font-headline text-xl font-black uppercase tracking-widest';
     const statusPlaceholderClass = placeholderBgClasses[status_normalized] || placeholderBgClasses.inactive;
     const imageContent = data.image_url
-      ? `<img src="${data.image_url}" alt="Defect" class="defect-image" onerror="this.outerHTML=\`${errorHtml}\`">`
+      ? `<img src="${data.image_url}" alt="Defect" class="defect-image object-contain max-w-full max-h-full" onerror="this.outerHTML=\`${errorHtml}\`">`
       : `<div class="${placeholderBaseClass} ${statusPlaceholderClass}"><span>${
           data.status === "INACTIVE" ? "NO SIGNAL" : data.status
         }</span></div>`;
