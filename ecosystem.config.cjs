@@ -1,32 +1,22 @@
 // ======================================================
 // Smart AOI Dashboard - PM2 Ecosystem Configuration
 // ======================================================
+// File ini menggunakan format CommonJS (module.exports) agar kompatibel
+// dengan semua versi PM2.
 
-export default {
+module.exports = {
   apps: [
     {
       name: "smart-aoi", // Nama proses di PM2
-      script: "./server.js", // Entry point
+      script: "server.js", // Entry point, path relatif dari root proyek
       instances: "max", // Gunakan semua core CPU
       exec_mode: "cluster", // Mode cluster untuk load balancing
       watch: false, // Nonaktifkan watch (lebih stabil di production)
       max_memory_restart: "1G", // Restart jika > 1GB RAM
       autorestart: true, // Auto restart kalau crash
-      env: {
-        NODE_ENV: "production",
-        PORT: 3000,
-      },
-      // ✅ BEST PRACTICE: Hapus path log absolut. Biarkan PM2 mengelola log di ~/.pm2/logs.
-      // Ini lebih portabel dan menghindari masalah izin pada /var/log.
-      // Log dari logger kustom kita akan otomatis ditangkap oleh PM2.
+      env: { NODE_ENV: "production" }, // PORT lebih baik diatur di file .env
       merge_logs: true,
-      time: true, // Tambahkan timestamp di log
+      log_date_format: "YYYY-MM-DD HH:mm:ss Z", // Format timestamp modern
     },
   ],
-
-  // ======================================================
-  // Log Rotation: Untuk rotasi log otomatis, install `pm2-logrotate`
-  // > pm2 install pm2-logrotate
-  // ======================================================
-  deploy: {}, // tidak dipakai tapi harus ada di ESM export
 };
