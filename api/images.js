@@ -2,6 +2,7 @@
 import express from "express";
 import fs from "fs";
 import path from "path";
+import sharp from "sharp"; // ✨ NEW: Import sharp untuk konversi gambar
 import logger from "../utils/logger.js";
 
 const router = express.Router();
@@ -46,23 +47,23 @@ router.get("/", (req, res) => {
     imagePath = fallbackPath;
   }
 
-  const stream = fs.createReadStream(imagePath);
-  const ext = path.extname(file).toLowerCase();
-  const mime =
-    ext === ".jpg" || ext === ".jpeg"
-      ? "image/jpeg"
-      : ext === ".png"
-      ? "image/png"
-      : "application/octet-stream";
+  // ✨ NEW: Konversi gambar ke WebP on-the-fly menggunakan sharp
+  res.setHeader("Content-Type", "image/webp");
+  // Cache di browser selama 1 jam, karena gambar lama tidak berubah
+  res.setHeader("Cache-Control", "public, max-age=3600");
 
-  res.setHeader("Content-Type", mime);
-  res.setHeader("Cache-Control", "no-store");
-  stream.pipe(res);
+  const converter = sharp(imagePath)
+    .webp({ quality: 80 }); // Kualitas 80 adalah kompromi yang baik
 
-  stream.on("error", (err) => {
-    logger.error("Error reading image stream", err, { imagePath });
-    res.status(500).type("text/plain").send("Error reading image");
+  converter.on("error", (err) => {
+    logger.error("Error converting image with sharp", err, { imagePath });
+    // Jika sharp gagal, jangan kirim response lagi jika header sudah terkirim
+    if (!res.headersSent) {
+      res.status(500).type("text/plain").send("Error processing image");
+    }
   });
+
+  converter.pipe(res);
 });
 
 export default router;
