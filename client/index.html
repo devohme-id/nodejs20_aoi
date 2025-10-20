@@ -5,22 +5,21 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Smart AOI Dashboard</title>
-    <link rel="stylesheet" href="/src/css/style.css" />
   </head>
   <body>
-    <header class="header-ui">
+    <header class="bg-gray-800 text-white py-4 shadow-md">
       <div>
-        <h1 class="header-title">Smart AOI Dashboard</h1>
-        <p class="header-subtitle">Real-time Production Monitoring</p>
+        <h1 class="text-2xl font-semibold">Smart AOI Dashboard</h1>
+        <p class="text-sm">Real-time Production Monitoring</p>
       </div>
-      <div class="header-clock-area">
-        <button id="sound-toggle-btn" class="btn-report sound-btn muted">
+      <div class="flex items-center">
+        <button id="sound-toggle-btn" class="mx-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 focus:outline-none">
           <!-- SVG icons for sound on/off -->
         </button>
-        <div id="clock" class="header-clock"></div>
+        <div id="clock" class="text-lg font-mono"></div>
       </div>
     </header>
-    <main id="panel-area" class="panel-area"></main>
+    <main id="panel-area" class="container mx-auto py-6"></main>
     <audio id="alert-sound" src="/src/assets/sounds/alarm.wav" preload="auto"></audio>
     <script type="module" src="/src/js/main.js"></script>
   </body>

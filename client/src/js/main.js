@@ -2,6 +2,7 @@
 // ==========================================================================
 // Entry Point Aplikasi
 // ==========================================================================
+import '../css/style.css'; // ✨ NEW: Import file CSS utama Tailwind
 
 import { TOTAL_LINES, SOUND_DELAY } from './modules/config.js';
 import { Chart } from 'chart.js/auto';

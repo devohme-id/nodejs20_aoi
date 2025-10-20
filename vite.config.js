@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-
+import tailwindcss from '@tailwindcss/vite';
 // https://vitejs.dev/config/
 export default defineConfig({
   // Menetapkan root dari aplikasi frontend kita
@@ -22,4 +22,8 @@ export default defineConfig({
     outDir: '../dist',
     emptyOutDir: true, // Membersihkan 'dist' sebelum setiap build
   },
+
+  plugins: [
+    tailwindcss(),
+  ],
 });
