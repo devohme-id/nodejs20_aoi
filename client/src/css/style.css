@@ -1,0 +1,34 @@
+/* PERBAIKAN: Impor layer Tailwind v4 secara eksplisit */
+@import "tailwindcss";
+
+/* ==========================================================================
+   Load Font Kustom
+   ========================================================================== */
+@font-face {
+  font-family: "MyFontText";
+  src: url("../assets/fonts/LGEITextTTF-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "MyFontHeadline";
+  src: url("../assets/fonts/LGEIHeadlineTTF-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Peringatan Critical Defect, hanya menargetkan border gambar */
+.image-container.critical-alert {
+  --red-color: #f87171;
+  border-color: var(--red-color) !important;
+  box-shadow: 0 0 25px var(--red-color) !important;
+  animation: pulse-red-border 1.5s infinite;
+}
+
+@keyframes pulse-red-border {
+  50% {
+    --red-color: #f87171;
+    box-shadow: 0 0 35px var(--red-color);
+  }
+}
