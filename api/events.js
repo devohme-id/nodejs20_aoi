@@ -71,7 +71,7 @@ async function pollDatabase() {
 
 // Mulai server-side polling (sangat ringan)
 // Cukup cek setiap 2 detik. Jauh lebih ringan daripada N klien x 5 detik.
-setInterval(pollDatabase, 1500);
+const pollingInterval = setInterval(pollDatabase, 1500);
 
 // Endpoint utama SSE
 router.get("/", (req, res) => {
@@ -108,5 +108,18 @@ router.get("/", (req, res) => {
     );
   });
 });
+
+// ✨ NEW: Fungsi untuk graceful shutdown
+export async function shutdownEvents() {
+  console.log("🔌 Shutting down SSE module...");
+  // 1. Hentikan polling database
+  clearInterval(pollingInterval);
+  // 2. Tutup semua koneksi client SSE yang aktif
+  clients.forEach((client) => client.res.end());
+  clients = []; // Kosongkan array
+  // 3. Tutup koneksi pool database
+  await pool.end();
+  console.log("✅ SSE module shut down gracefully.");
+}
 
 export default router;

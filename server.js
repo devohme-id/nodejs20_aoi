@@ -12,7 +12,7 @@ import logger from "./utils/logger.js"; // ✨ NEW: Import logger terpusat
 // Import API routes
 import dashboardRouter from "./api/dashboard.js";
 import imageRouter from "./api/images.js";
-import eventRouter from "./api/events.js";
+import eventRouter, { shutdownEvents } from "./api/events.js"; // ✨ IMPORT shutdown function
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -75,17 +75,31 @@ app.use((err, req, res, next) => {
 // Start Server
 // ======================================================
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, "0.0.0.0", () => {
+const server = app.listen(PORT, "0.0.0.0", () => {
   logger.info("==========================================");
   logger.info("✅ Smart AOI Dashboard Server is running!");
   logger.info(`🌐 Listening on http://0.0.0.0:${PORT}`);
   logger.info("------------------------------------------");
 });
 
-// ======================================================
-// Graceful Shutdown
-// ======================================================
-process.on("SIGTERM", () => {
-  logger.info("🛑 Server shutting down gracefully...");
-  process.exit(0);
-});
+// =================================================================
+// ✨ NEW: Graceful Shutdown Logic
+// =================================================================
+const gracefulShutdown = (signal) => {
+  logger.warn(`🚦 ${signal} received. Shutting down gracefully...`);
+  server.close(async () => {
+    logger.info("✅ HTTP server closed.");
+    try {
+      // Tutup semua koneksi persisten (SSE, DB Pool, etc)
+      await shutdownEvents();
+      logger.info("🏁 All resources cleaned up. Exiting.");
+      process.exit(0);
+    } catch (err) {
+      logger.error("💥 Error during graceful shutdown", err);
+      process.exit(1);
+    }
+  });
+};
+
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM")); // Diterima dari PM2 stop/restart
+process.on("SIGINT", () => gracefulShutdown("SIGINT")); // Diterima dari PM2 reload atau Ctrl+C

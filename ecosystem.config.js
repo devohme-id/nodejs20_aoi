@@ -16,6 +16,7 @@ module.exports = {
       max_memory_restart: "1G", // Restart jika > 1GB RAM
       autorestart: true, // Auto restart kalau crash
       env: { NODE_ENV: "production" }, // PORT lebih baik diatur di file .env
+      kill_timeout: 5000, // ✨ NEW: Beri waktu 5 detik untuk graceful shutdown
       merge_logs: true,
       log_date_format: "YYYY-MM-DD HH:mm:ss Z", // Format timestamp modern
     },
