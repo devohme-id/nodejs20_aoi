@@ -91,8 +91,17 @@ router.get("/", (req, res) => {
   clients.push(newClient);
   console.log(`✅ Client SSE terhubung: ${clientId}. Total: ${clients.length}`);
 
+  // ✨ OPTIMASI: Kirim "heartbeat" setiap 20 detik untuk menjaga koneksi tetap hidup
+  // Beberapa proxy atau load balancer akan memutus koneksi yang idle.
+  const keepAliveInterval = setInterval(() => {
+    res.write(": keep-alive\n\n");
+  }, 20000);
+
   // Saat client disconnect
   req.on("close", () => {
+    // Hentikan interval heartbeat untuk client ini
+    clearInterval(keepAliveInterval);
+
     clients = clients.filter((client) => client.id !== clientId);
     console.log(
       `🔌 Client SSE terputus: ${clientId}. Total: ${clients.length}`
