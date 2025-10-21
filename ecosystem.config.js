@@ -6,7 +6,7 @@
 export default {
   apps: [
     {
-      name: "smart-aoi", // Nama proses di PM2
+      name: "smart-aoi-dashboard", // Nama proses di PM2
       script: "server.js", // Entry point, path relatif dari root proyek
       instances: "max", // Gunakan semua core CPU
       exec_mode: "cluster", // Mode cluster untuk load balancing
