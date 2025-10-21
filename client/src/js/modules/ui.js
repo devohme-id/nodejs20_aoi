@@ -25,7 +25,7 @@ export function createDefaultLineData() {
 
 export function createPanelHTML(lineNumber) {
     return `
-    <div class="bg-slate-800 border border-slate-700 rounded-xl py-4 px-5 shadow-lg shadow-black/20 grid grid-rows-[auto_1fr_auto_auto] gap-2 min-h-0 overflow-hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-xl py-4 px-5 shadow-lg shadow-black/20 grid grid-rows-[auto_1fr_auto_auto] gap-2 h-full overflow-clip">
         <div class="flex justify-between items-center">
             <h2 class="text-xl font-bold font-headline text-slate-300">LINE ${lineNumber}</h2>
             <span id="panel_status_${lineNumber}" class="py-1 px-4 rounded-lg text-sm font-bold uppercase text-slate-200 bg-slate-600">INACTIVE</span>
@@ -41,7 +41,7 @@ export function createPanelHTML(lineNumber) {
                 <div class="grid grid-cols-[85px_1fr] items-center gap-y-3"><span class="text-slate-300">Inspection</span><span id="detail_inspect_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</span></div>
                 <div class="grid grid-cols-[85px_1fr] items-center gap-y-3"><span class="text-slate-300">Review</span><span id="detail_review_${lineNumber}" class="font-semibold text-slate-300 overflow-hidden text-ellipsis whitespace-nowrap">N/A</span></div>
             </div>
-            <div id="image_container_${lineNumber}" class="relative size-full flex items-center justify-center bg-black/20 rounded-lg border-[3px] border-slate-700 shadow-transparent transition-all duration-300 ease-in-out cursor-pointer hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]" data-line="${lineNumber}"></div>
+            <div id="image_container_${lineNumber}" class="relative object-center object-fill size-full flex items-center justify-center bg-black/20 rounded-lg border-[3px] border-slate-700 shadow-transparent transition-all duration-300 ease-in-out cursor-pointer hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]" data-line="${lineNumber}"></div>
         </div>
         <div class="grid grid-cols-5 gap-2">
             <div class="bg-slate-900/50 rounded p-1 text-center"><div id="kpi_pass_rate_${lineNumber}" class="text-md font-bold transition-colors duration-300">0%</div><div class="text-[0.65rem] uppercase text-slate-300">Pass Rate</div></div>
